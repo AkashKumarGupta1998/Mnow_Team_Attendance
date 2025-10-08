@@ -1,0 +1,610 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MNow DS Team - Attendance Portal</title>
+    <style>
+        :root {
+            --primary: #2c3e50;
+            --secondary: #3498db;
+            --success: #27ae60;
+            --light: #ecf0f1;
+            --dark: #2c3e50;
+            --danger: #e74c3c;
+            --warning: #f39c12;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #f5f7fa;
+            color: var(--dark);
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            background-color: var(--primary);
+            color: white;
+            padding: 20px 0;
+            text-align: center;
+            border-radius: 8px 8px 0 0;
+            margin-bottom: 20px;
+        }
+        
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        
+        .subtitle {
+            font-size: 16px;
+            opacity: 0.8;
+        }
+        
+        .card {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            padding: 25px;
+            margin-bottom: 20px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+        
+        input, select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+        
+        .camera-container {
+            margin: 20px 0;
+            text-align: center;
+        }
+        
+        #video {
+            width: 100%;
+            max-width: 400px;
+            background-color: #eee;
+            border-radius: 4px;
+        }
+        
+        #canvas {
+            display: none;
+        }
+        
+        .captured-photo {
+            max-width: 300px;
+            border-radius: 4px;
+            margin: 10px auto;
+            display: block;
+        }
+        
+        .btn {
+            display: inline-block;
+            background-color: var(--secondary);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: background-color 0.3s;
+        }
+        
+        .btn:hover {
+            background-color: #2980b9;
+        }
+        
+        .btn-success {
+            background-color: var(--success);
+        }
+        
+        .btn-success:hover {
+            background-color: #219653;
+        }
+        
+        .btn-danger {
+            background-color: var(--danger);
+        }
+        
+        .btn-danger:hover {
+            background-color: #c0392b;
+        }
+        
+        .btn-warning {
+            background-color: var(--warning);
+        }
+        
+        .btn-warning:hover {
+            background-color: #e67e22;
+        }
+        
+        .capture-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        
+        .attendance-list {
+            margin-top: 30px;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        th, td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        th {
+            background-color: #f8f9fa;
+            font-weight: 600;
+        }
+        
+        .photo-cell {
+            width: 80px;
+        }
+        
+        .photo-thumbnail {
+            width: 50px;
+            height: 50px;
+            object-fit: cover;
+            border-radius: 4px;
+        }
+        
+        .no-data {
+            text-align: center;
+            padding: 20px;
+            color: #7f8c8d;
+        }
+        
+        .success-message {
+            background-color: #d4edda;
+            color: #155724;
+            padding: 12px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            display: none;
+        }
+        
+        .error-message {
+            background-color: #f8d7da;
+            color: #721c24;
+            padding: 12px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            display: none;
+        }
+        
+        .instructions {
+            background-color: #e8f4fd;
+            border-left: 4px solid var(--secondary);
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 0 4px 4px 0;
+        }
+        
+        .instructions h3 {
+            margin-bottom: 10px;
+            color: var(--primary);
+        }
+        
+        .instructions ol {
+            margin-left: 20px;
+        }
+        
+        .instructions li {
+            margin-bottom: 8px;
+        }
+        
+        @media (max-width: 600px) {
+            .container {
+                padding: 10px;
+            }
+            
+            .card {
+                padding: 15px;
+            }
+            
+            th, td {
+                padding: 8px 10px;
+            }
+            
+            .capture-buttons {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="logo">MNow DS Team</div>
+            <div class="subtitle">Attendance Portal</div>
+        </header>
+        
+        <div class="instructions">
+            <h3>How to Set Up Google Sheets Integration</h3>
+            <ol>
+                <li>Create a Google Sheet with columns: Timestamp, Name, DS Name, Mobile, Role</li>
+                <li>Go to Tools > Script editor and create a new Apps Script</li>
+                <li>Copy the provided script code and save it</li>
+                <li>Deploy as a web app with "Anyone" access</li>
+                <li>Copy the web app URL and paste it in the field below</li>
+            </ol>
+        </div>
+        
+        <div class="card">
+            <h2>Google Sheets Configuration</h2>
+            <div class="form-group">
+                <label for="sheetUrl">Google Apps Script Web App URL</label>
+                <input type="url" id="sheetUrl" placeholder="https://script.google.com/macros/s/..." value="">
+                <small>This URL will be saved in your browser for future use</small>
+            </div>
+            <button id="saveUrlBtn" class="btn">Save URL</button>
+        </div>
+        
+        <div class="success-message" id="successMessage">
+            Attendance marked successfully!
+        </div>
+        
+        <div class="error-message" id="errorMessage">
+            Error submitting attendance. Please try again.
+        </div>
+        
+        <div class="card">
+            <h2>Mark Your Attendance</h2>
+            <form id="attendanceForm">
+                <div class="form-group">
+                    <label for="name">Full Name</label>
+                    <input type="text" id="name" placeholder="Enter your full name" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="dsName">Dark Store Name</label>
+                    <select id="dsName" required>
+                        <option value="">Select Dark Store</option>
+                        <option value="DS-001">DS-001 (Downtown)</option>
+                        <option value="DS-002">DS-002 (Westside)</option>
+                        <option value="DS-003">DS-003 (East End)</option>
+                        <option value="DS-004">DS-004 (North Point)</option>
+                        <option value="DS-005">DS-005 (Central Hub)</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="mobile">Mobile Number</label>
+                    <input type="tel" id="mobile" placeholder="Enter 10-digit mobile number" required pattern="[0-9]{10}">
+                </div>
+                
+                <div class="form-group">
+                    <label for="role">Your Role</label>
+                    <select id="role" required>
+                        <option value="">Select Role</option>
+                        <option value="Picker">Picker</option>
+                        <option value="Packer">Packer</option>
+                        <option value="Delivery">Delivery</option>
+                        <option value="Supervisor">Supervisor</option>
+                        <option value="Manager">Manager</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label>Capture Selfie</label>
+                    <div class="camera-container">
+                        <video id="video" autoplay></video>
+                        <canvas id="canvas"></canvas>
+                        <img id="capturedImage" class="captured-photo" style="display: none;">
+                        <div class="capture-buttons">
+                            <button type="button" id="captureBtn" class="btn">Capture Photo</button>
+                            <button type="button" id="retakeBtn" class="btn btn-danger" style="display: none;">Retake</button>
+                        </div>
+                    </div>
+                </div>
+                
+                <button type="submit" class="btn btn-success" style="width: 100%;">Mark Attendance</button>
+            </form>
+        </div>
+        
+        <div class="card attendance-list">
+            <h2>Today's Attendance Records</h2>
+            <div id="attendanceTable">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Time</th>
+                            <th>Name</th>
+                            <th>DS Name</th>
+                            <th>Mobile</th>
+                            <th>Role</th>
+                            <th class="photo-cell">Photo</th>
+                        </tr>
+                    </thead>
+                    <tbody id="attendanceRecords">
+                        <!-- Records will be populated here -->
+                    </tbody>
+                </table>
+                <div class="no-data" id="noDataMessage">No attendance records for today yet.</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // DOM Elements
+        const video = document.getElementById('video');
+        const canvas = document.getElementById('canvas');
+        const capturedImage = document.getElementById('capturedImage');
+        const captureBtn = document.getElementById('captureBtn');
+        const retakeBtn = document.getElementById('retakeBtn');
+        const attendanceForm = document.getElementById('attendanceForm');
+        const attendanceRecords = document.getElementById('attendanceRecords');
+        const noDataMessage = document.getElementById('noDataMessage');
+        const successMessage = document.getElementById('successMessage');
+        const errorMessage = document.getElementById('errorMessage');
+        const sheetUrlInput = document.getElementById('sheetUrl');
+        const saveUrlBtn = document.getElementById('saveUrlBtn');
+        
+        let stream = null;
+        let capturedImageData = null;
+        
+        // Load saved Google Sheets URL
+        function loadSavedUrl() {
+            const savedUrl = localStorage.getItem('googleSheetsUrl');
+            if (savedUrl) {
+                sheetUrlInput.value = savedUrl;
+            }
+        }
+        
+        // Save Google Sheets URL
+        saveUrlBtn.addEventListener('click', () => {
+            const url = sheetUrlInput.value.trim();
+            if (url) {
+                localStorage.setItem('googleSheetsUrl', url);
+                alert('Google Sheets URL saved successfully!');
+            } else {
+                alert('Please enter a valid URL');
+            }
+        });
+        
+        // Initialize camera
+        async function initCamera() {
+            try {
+                stream = await navigator.mediaDevices.getUserMedia({ 
+                    video: { 
+                        width: { ideal: 640 }, 
+                        height: { ideal: 480 },
+                        facingMode: "user" 
+                    } 
+                });
+                video.srcObject = stream;
+            } catch (err) {
+                console.error("Error accessing camera: ", err);
+                alert("Unable to access camera. Please check permissions.");
+            }
+        }
+        
+        // Capture photo from video stream
+        captureBtn.addEventListener('click', () => {
+            const context = canvas.getContext('2d');
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            context.drawImage(video, 0, 0, canvas.width, canvas.height);
+            
+            // Convert canvas to data URL
+            capturedImageData = canvas.toDataURL('image/jpeg');
+            capturedImage.src = capturedImageData;
+            capturedImage.style.display = 'block';
+            
+            // Show retake button and hide capture button
+            captureBtn.style.display = 'none';
+            retakeBtn.style.display = 'inline-block';
+            
+            // Stop the video stream
+            if (stream) {
+                stream.getTracks().forEach(track => track.stop());
+            }
+        });
+        
+        // Retake photo
+        retakeBtn.addEventListener('click', () => {
+            capturedImageData = null;
+            capturedImage.style.display = 'none';
+            captureBtn.style.display = 'inline-block';
+            retakeBtn.style.display = 'none';
+            initCamera();
+        });
+        
+        // Load attendance records from localStorage
+        function loadAttendanceRecords() {
+            const today = new Date().toDateString();
+            const records = JSON.parse(localStorage.getItem('attendanceRecords') || '[]');
+            const todayRecords = records.filter(record => 
+                new Date(record.timestamp).toDateString() === today
+            );
+            
+            displayAttendanceRecords(todayRecords);
+        }
+        
+        // Display attendance records in the table
+        function displayAttendanceRecords(records) {
+            if (records.length === 0) {
+                noDataMessage.style.display = 'block';
+                attendanceRecords.innerHTML = '';
+                return;
+            }
+            
+            noDataMessage.style.display = 'none';
+            
+            // Sort records by timestamp (newest first)
+            records.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+            
+            const recordsHTML = records.map(record => `
+                <tr>
+                    <td>${formatTime(record.timestamp)}</td>
+                    <td>${record.name}</td>
+                    <td>${record.dsName}</td>
+                    <td>${record.mobile}</td>
+                    <td>${record.role}</td>
+                    <td class="photo-cell">
+                        <img src="${record.photo}" alt="Selfie" class="photo-thumbnail">
+                    </td>
+                </tr>
+            `).join('');
+            
+            attendanceRecords.innerHTML = recordsHTML;
+        }
+        
+        // Format timestamp to readable time
+        function formatTime(timestamp) {
+            const date = new Date(timestamp);
+            return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        }
+        
+        // Submit data to Google Sheets
+        async function submitToGoogleSheets(data) {
+            const webAppUrl = localStorage.getItem('googleSheetsUrl');
+            
+            if (!webAppUrl) {
+                throw new Error('Google Sheets URL not configured. Please set it up first.');
+            }
+            
+            const formData = new FormData();
+            formData.append('timestamp', data.timestamp);
+            formData.append('name', data.name);
+            formData.append('dsName', data.dsName);
+            formData.append('mobile', data.mobile);
+            formData.append('role', data.role);
+            formData.append('photo', data.photo);
+            
+            try {
+                const response = await fetch(webAppUrl, {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                
+                return await response.text();
+            } catch (error) {
+                console.error('Error submitting to Google Sheets:', error);
+                throw error;
+            }
+        }
+        
+        // Handle form submission
+        attendanceForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            if (!capturedImageData) {
+                alert('Please capture your selfie before submitting.');
+                return;
+            }
+            
+            const submitBtn = attendanceForm.querySelector('button[type="submit"]');
+            const originalText = submitBtn.textContent;
+            submitBtn.textContent = 'Submitting...';
+            submitBtn.disabled = true;
+            
+            const formData = {
+                name: document.getElementById('name').value,
+                dsName: document.getElementById('dsName').value,
+                mobile: document.getElementById('mobile').value,
+                role: document.getElementById('role').value,
+                photo: capturedImageData,
+                timestamp: new Date().toISOString()
+            };
+            
+            try {
+                // Try to submit to Google Sheets
+                await submitToGoogleSheets(formData);
+                
+                // Save to localStorage as backup
+                const records = JSON.parse(localStorage.getItem('attendanceRecords') || '[]');
+                records.push(formData);
+                localStorage.setItem('attendanceRecords', JSON.stringify(records));
+                
+                // Show success message
+                successMessage.style.display = 'block';
+                errorMessage.style.display = 'none';
+                setTimeout(() => {
+                    successMessage.style.display = 'none';
+                }, 5000);
+                
+                // Reset form
+                attendanceForm.reset();
+                capturedImageData = null;
+                capturedImage.style.display = 'none';
+                captureBtn.style.display = 'inline-block';
+                retakeBtn.style.display = 'none';
+                
+                // Reload camera and records
+                initCamera();
+                loadAttendanceRecords();
+                
+            } catch (error) {
+                console.error('Submission error:', error);
+                errorMessage.textContent = `Error: ${error.message}. Data saved locally only.`;
+                errorMessage.style.display = 'block';
+                successMessage.style.display = 'none';
+                
+                // Still save to localStorage even if Google Sheets fails
+                const records = JSON.parse(localStorage.getItem('attendanceRecords') || '[]');
+                records.push(formData);
+                localStorage.setItem('attendanceRecords', JSON.stringify(records));
+                
+                // Reset form but keep showing error
+                attendanceForm.reset();
+                capturedImageData = null;
+                capturedImage.style.display = 'none';
+                captureBtn.style.display = 'inline-block';
+                retakeBtn.style.display = 'none';
+                
+                initCamera();
+                loadAttendanceRecords();
+            } finally {
+                submitBtn.textContent = originalText;
+                submitBtn.disabled = false;
+            }
+        });
+        
+        // Initialize the page
+        window.addEventListener('DOMContentLoaded', () => {
+            initCamera();
+            loadAttendanceRecords();
+            loadSavedUrl();
+        });
+    </script>
+</body>
+</html>
